@@ -984,36 +984,43 @@ case $PROJECT in
 		;;
 
 	ubuntu-mate)
-		# Ubuntu MATE now ships the new installer.
-		touch config/universe-enabled
-		PASSES_TO_LAYERS="true"
-		KERNEL_FLAVOURS=generic
-		add_task minimal minimal standard ubuntu-mate-core
-		add_package minimal cloud-init
-		add_task minimal.standard ubuntu-mate-desktop
-		add_task minimal.standard.live ubuntu-mate-live
-		add_package minimal.standard.live linux-$KERNEL_FLAVOURS
-		cat <<-EOF > config/minimal.catalog-in.yaml
-			name: "Ubuntu MATE Desktop (minimized)"
-			description: >-
-			  A minimal installation of the Ubuntu MATE Desktop.
-			id: ubuntu-mate-desktop-minimal
-			type: fsimage-layered
-			variant: desktop
-			locale_support: langpack
-		EOF
-		cat <<-EOF > config/minimal.standard.catalog-in.yaml
-			name: "Ubuntu MATE Desktop"
-			description: >-
-			  A full featured Ubuntu MATE Desktop.
-			id: ubuntu-mate-desktop
-			type: fsimage-layered
-			variant: desktop
-			locale_support: langpack
-			default: yes
-		EOF
-		/usr/share/livecd-rootfs/checkout-translations-branch \
-			https://git.launchpad.net/subiquity po config/catalog-translations
+		case ${SUBPROJECT:-} in
+			desktop-preinstalled)
+				add_task install minimal standard ubuntu-mate-desktop
+				;;
+			*)
+				# Ubuntu MATE now ships the new installer.
+				touch config/universe-enabled
+				PASSES_TO_LAYERS="true"
+				KERNEL_FLAVOURS=generic
+				add_task minimal minimal standard ubuntu-mate-core
+				add_package minimal cloud-init
+				add_task minimal.standard ubuntu-mate-desktop
+				add_task minimal.standard.live ubuntu-mate-live
+				add_package minimal.standard.live linux-$KERNEL_FLAVOURS
+				cat <<-EOF > config/minimal.catalog-in.yaml
+					name: "Ubuntu MATE Desktop (minimized)"
+					description: >-
+					  A minimal installation of the Ubuntu MATE Desktop.
+					id: ubuntu-mate-desktop-minimal
+					type: fsimage-layered
+					variant: desktop
+					locale_support: langpack
+				EOF
+				cat <<-EOF > config/minimal.standard.catalog-in.yaml
+					name: "Ubuntu MATE Desktop"
+					description: >-
+					  A full featured Ubuntu MATE Desktop.
+					id: ubuntu-mate-desktop
+					type: fsimage-layered
+					variant: desktop
+					locale_support: langpack
+					default: yes
+				EOF
+				/usr/share/livecd-rootfs/checkout-translations-branch \
+					https://git.launchpad.net/subiquity po config/catalog-translations
+				;;
+		esac
 		;;
 
 	ubuntustudio-dvd)
@@ -1522,7 +1529,7 @@ case $PROJECT:${SUBPROJECT:-} in
 	ubuntu-cpc:*|ubuntu-server:live|ubuntu:desktop-preinstalled| \
 		ubuntu-wsl:*|ubuntu-mini-iso:*|ubuntu:|ubuntu-oem:*| \
 		ubuntustudio-dvd:*|edubuntu:*|ubuntu-budgie:*|ubuntucinnamon:*|xubuntu:*| \
-	        ubuntukylin:*)
+	        ubuntukylin:*|ubuntu-mate:desktop-preinstalled)
 		# Ensure that most things e.g. includes.chroot are copied as is
 		for entry in /usr/share/livecd-rootfs/live-build/${PROJECT}/*; do
 			case $entry in
@@ -1559,21 +1566,27 @@ esac
 case $PROJECT in
 	ubuntu-oem|ubuntustudio-dvd|edubuntu|ubuntu-budgie|ubuntucinnamon| \
 	xubuntu|ubuntukylin|ubuntu-mate)
-		cp -af /usr/share/livecd-rootfs/live-build/ubuntu/includes.chroot \
-			config/includes.chroot
+		case ${SUBPROJECT:-} in
+			desktop-preinstalled)
+				;;
+			*)
+				cp -af /usr/share/livecd-rootfs/live-build/ubuntu/includes.chroot \
+					config/includes.chroot
 
-		LIVE_LAYER=${LIVE_LAYER_PARENT:-minimal.standard}.live
-		cp -af /usr/share/livecd-rootfs/live-build/ubuntu/includes.chroot.minimal.standard.live \
-			config/includes.chroot.$LIVE_LAYER
+				LIVE_LAYER=${LIVE_LAYER_PARENT:-minimal.standard}.live
+				cp -af /usr/share/livecd-rootfs/live-build/ubuntu/includes.chroot.minimal.standard.live \
+					config/includes.chroot.$LIVE_LAYER
 
-		if [ $PROJECT != ubuntu-oem ]; then
-			# Per note at
-			# https://code.launchpad.net/~dbungert/livecd-rootfs/+git/livecd-rootfs/+merge/461665/comments/1240590,
-			# these files are expected to be moved out of livecd-rootfs,
-			# and are also incorrect for flavors.
-			rm -f config/includes.chroot.$LIVE_LAYER/usr/lib/systemd/user/ubuntu-desktop-installer.service
-			rm -f config/includes.chroot.$LIVE_LAYER/share/glib-2.0/schemas/livecd-rootfs.gschema.override
-		fi
+				if [ $PROJECT != ubuntu-oem ]; then
+					# Per note at
+					# https://code.launchpad.net/~dbungert/livecd-rootfs/+git/livecd-rootfs/+merge/461665/comments/1240590,
+					# these files are expected to be moved out of livecd-rootfs,
+					# and are also incorrect for flavors.
+					rm -f config/includes.chroot.$LIVE_LAYER/usr/lib/systemd/user/ubuntu-desktop-installer.service
+					rm -f config/includes.chroot.$LIVE_LAYER/share/glib-2.0/schemas/livecd-rootfs.gschema.override
+				fi
+				;;
+		esac
 		;;
 esac
 
