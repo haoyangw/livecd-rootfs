@@ -365,7 +365,8 @@ _get_live_passes ()
 
 if [ -z "${IMAGEFORMAT:-}" ]; then
 	case $PROJECT:${SUBPROJECT:-} in
-		ubuntu-cpc:*|ubuntu:desktop-preinstalled|ubuntu-wsl:*)
+		ubuntu-cpc:*|ubuntu:desktop-preinstalled| \
+			ubuntu-mate:desktop-preinstalled|ubuntu-wsl:*)
 			case $ARCH+${SUBARCH:-} in
 				arm64+raspi)
 					# All raspi images use ubuntu-image.
