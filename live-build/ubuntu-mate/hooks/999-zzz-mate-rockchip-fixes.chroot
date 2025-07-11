@@ -7,7 +7,12 @@ apt-get update
 
 # Fix for Ethernet connection not working on first boot
 echo "Installing and configuring netplan..."
-apt-get install -y netplan.io netplan-generator python3-netplan
+apt-get install -y netplan.io
+if [ "$LB_DISTRIBUTION" == "noble" ]; then
+	# 'netplan-generator' and 'python3-netplan' are not published on Jammy
+	apt-get install -y netplan-generator python3-netplan
+fi
+
 ## Configure netplan to use NetworkManager backend(not systemd-networkd)
 cat <<-'EOF' > /lib/netplan/00-network-manager-all.yaml
 	network:
