@@ -522,8 +522,8 @@ done
 
 # we don't need a manifest-remove for a layered-aware installer
 # here we have a list of all new-installer flavors
-case $PROJECT in
-	ubuntu|ubuntu-budgie)
+case $PROJECT:${SUBPROJECT:-} in
+	ubuntu:*|ubuntu-budgie:*|ubuntu-mate:desktop-preinstalled)
 		rm -f livecd.${PROJECT}-manifest-remove
 		rm -f config/manifest-minimal-remove
 		;;
