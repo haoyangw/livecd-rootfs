@@ -19,3 +19,18 @@ cat <<-'EOF' > /lib/netplan/00-network-manager-all.yaml
 	  version: 2
 	  renderer: NetworkManager
 EOF
+
+if [ "$LB_DISTRIBUTION" == "noble" ]; then
+	# Only required on Ubuntu Noble(not an issue on Ubuntu Jammy)
+	echo "Fixing MATE wallpaper for oem-config installer..."
+	# Create dconf config directory if it doesn't exist
+	mkdir -p /etc/dconf/db/local.d
+	# Add global dconf setting that sets Ubuntu Noble MATE wallpaper as the default
+	# desktop wallpaper
+	cat <<-'EOT' > /etc/dconf/db/local.d/01-mate-wallpaper
+		[org/mate/desktop/background]
+		picture-filename='/usr/share/backgrounds/ubuntu-mate-noble/numbat_wallpaper_green_3480x2160.jpg'
+	EOT
+	# Apply global dconf setting(s)
+	dconf update
+fi
