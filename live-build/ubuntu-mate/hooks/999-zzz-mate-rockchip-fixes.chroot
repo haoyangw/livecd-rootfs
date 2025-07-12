@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# Source important live-build config parameters
+. /root/config/chroot
+
 # Fix for 'apt install' not working on every reboot
 echo "Updating APT cache..."
 apt-get update
