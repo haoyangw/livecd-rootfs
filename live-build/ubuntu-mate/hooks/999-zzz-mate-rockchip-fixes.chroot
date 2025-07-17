@@ -22,3 +22,16 @@ cat <<-'EOF' > /lib/netplan/00-network-manager-all.yaml
 	  version: 2
 	  renderer: NetworkManager
 EOF
+
+# Fix for desktop wallpaper being black on Ubuntu MATE 24.04
+if [ "$LB_DISTRIBUTION" == "noble" ] && [ "$SUBPROJECT" == "desktop-preinstalled" ]; then
+	# HACK: Install 'feh' that is used to set MATE wallpaper in my custom ubiquity
+	# package
+	apt-get install -y feh
+	# Post-install hook for oem-config that removes 'feh'
+	cat <<-'EON' > /usr/lib/oem-config/post-install/remove-feh
+		#!/bin/sh
+		apt-get -y remove --purge feh
+	EON
+	chmod a+x /usr/lib/oem-config/post-install/remove-feh
+fi
